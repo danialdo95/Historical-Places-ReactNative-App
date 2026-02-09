@@ -1,5 +1,5 @@
 // src/screens/PlaceDetailScreen.tsx
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 import { PlacesContext } from '../context/PlacesContext';
 
+const fallbackImage = require('../assets/image-not-available.png');
+
 export default function PlaceDetailScreen({ route }: any) {
   const { id } = route.params;
   const { state, dispatch } = useContext(PlacesContext);
+
+  const [imageError, setImageError] = useState(false);
 
   const place = state.places.find((p: any) => p.id === id);
 
@@ -28,7 +32,11 @@ export default function PlaceDetailScreen({ route }: any) {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Hero Image */}
-      <Image source={{ uri: place.image }} style={styles.image} />
+      <Image
+        source={imageError ? fallbackImage : { uri: place.image }}
+        style={styles.image}
+        onError={() => setImageError(true)}
+      />
 
       {/* Content Card */}
       <View style={styles.content}>

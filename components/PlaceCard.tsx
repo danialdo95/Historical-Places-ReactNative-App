@@ -1,5 +1,5 @@
 // src/components/PlaceCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,18 @@ import {
   StyleSheet,
 } from 'react-native';
 
+const fallbackImage = require('../assets/image-not-available.png');
+
 export default function PlaceCard({ place, onPress, onToggle }: any) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <View style={styles.card}>
-      <Image source={{ uri: place.image }} style={styles.image} />
+      <Image
+        source={imageError ? fallbackImage : { uri: place.image }}
+        style={styles.image}
+        onError={() => setImageError(true)}
+      />
 
       <View style={styles.content}>
         <Text style={styles.title}>{place.name}</Text>

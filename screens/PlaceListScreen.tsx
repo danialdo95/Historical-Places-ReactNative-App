@@ -1,17 +1,32 @@
 import React, { useContext, useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Pressable, Image } from 'react-native';
+import {
+  View,
+  FlatList,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+} from 'react-native';
 import { PlacesContext } from '../context/PlacesContext';
 import PlaceCard from '../components/PlaceCard';
 
 export default function PlaceListScreen({ navigation }: any) {
   const { state, dispatch } = useContext(PlacesContext);
   const [suggestedPlace, setSuggestedPlace] = useState<any>(null);
+  const [suggestionImageError, setSuggestionImageError] = useState(false);
+
 
   const suggestRandomPlace = () => {
     if (state.places.length === 0) return;
 
     const randomIndex = Math.floor(Math.random() * state.places.length);
+    setSuggestionImageError(false); // ✅ reset image error
     setSuggestedPlace(state.places[randomIndex]);
+  };
+
+  const clearSuggestedPlace = () => {
+    setSuggestionImageError(false); // ✅ reset image error
+    setSuggestedPlace(null);
   };
 
   return (
@@ -23,33 +38,41 @@ export default function PlaceListScreen({ navigation }: any) {
 
       {/* Suggested Place Preview */}
       {suggestedPlace && (
-        <Pressable
-          style={styles.suggestionCard}
-          onPress={() =>
-            navigation.navigate('Details', { id: suggestedPlace.id })
-          }
-        >
-          <Image
-            source={{ uri: suggestedPlace.image }}
-            style={styles.suggestionImage}
-          />
-          <Text style={styles.suggestionTitle}>
-            {suggestedPlace.name}
-          </Text>
-          <Text style={styles.suggestionHint}>Tap to view details</Text>
-        </Pressable>
+        <View style={styles.suggestionWrapper}>
+          <Pressable
+            style={styles.suggestionCard}
+            onPress={() =>
+              navigation.navigate('Details', { id: suggestedPlace.id })
+            }
+          >
+            <Image
+              source={
+                suggestionImageError || !suggestedPlace.image
+                  ? require('../assets/image-not-available.png')
+                  : { uri: suggestedPlace.image }
+              }
+              style={styles.suggestionImage}
+              onError={() => setSuggestionImageError(true)}
+            />
+            <Text style={styles.suggestionTitle}>{suggestedPlace.name}</Text>
+            <Text style={styles.suggestionHint}>Tap to view details</Text>
+          </Pressable>
+
+          {/* Clear button */}
+          <Pressable style={styles.clearButton} onPress={clearSuggestedPlace}>
+            <Text style={styles.clearButtonText}>Clear suggestion</Text>
+          </Pressable>
+        </View>
       )}
 
       <FlatList
         data={state.places}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <PlaceCard
             place={item}
-            onPress={() =>
-              navigation.navigate('Details', { id: item.id })
-            }
+            onPress={() => navigation.navigate('Details', { id: item.id })}
             onToggle={() =>
               dispatch({ type: 'TOGGLE_VISITED', payload: item.id })
             }
@@ -108,5 +131,21 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     paddingHorizontal: 12,
     paddingBottom: 12,
+  },
+  suggestionWrapper: {
+    marginBottom: 8,
+  },
+  clearButton: {
+    alignSelf: 'center',
+    marginTop: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: '#E5E7EB',
+  },
+  clearButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
   },
 });
