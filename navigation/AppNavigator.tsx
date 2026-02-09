@@ -18,18 +18,12 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Places"
         component={PlaceListScreen}
-        options={{
-          title: 'Historical Places',
-          headerBackVisible: false, // root screen
-        }}
+        options={{ title: 'Historical Places' }}
       />
-
       <Stack.Screen
         name="Details"
         component={PlaceDetailScreen}
-        options={{
-          title: 'Place Details',
-        }}
+        options={{ title: 'Place Details' }}
       />
     </Stack.Navigator>
   );

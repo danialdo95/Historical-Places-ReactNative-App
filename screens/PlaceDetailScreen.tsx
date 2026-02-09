@@ -15,7 +15,15 @@ export default function PlaceDetailScreen({ route }: any) {
   const { state, dispatch } = useContext(PlacesContext);
 
   const place = state.places.find((p: any) => p.id === id);
-  if (!place) return null;
+
+  // ✅ IMPORTANT: handle loading state for deep linking
+  if (!place) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading place details…</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -94,5 +102,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5F6FA',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#6B7280',
   },
 });
