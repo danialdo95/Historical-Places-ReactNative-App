@@ -1,5 +1,5 @@
 // src/screens/PlaceDetailScreen.tsx
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,19 +8,22 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { PlacesContext } from '../context/PlacesContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleVisited } from '../places/places.action';
 
 const fallbackImage = require('../assets/image-not-available.png');
 
 export default function PlaceDetailScreen({ route }: any) {
   const { id } = route.params;
-  const { state, dispatch } = useContext(PlacesContext);
+
+  const dispatch = useDispatch();
+  const place = useSelector((state: any) =>
+    state.places.places.find((p: any) => p.id === id)
+  );
 
   const [imageError, setImageError] = useState(false);
 
-  const place = state.places.find((p: any) => p.id === id);
-
-  // ✅ IMPORTANT: handle loading state for deep linking
+  // ⏳ Handle cold deep-link or slow load
   if (!place) {
     return (
       <View style={styles.loadingContainer}>
@@ -31,14 +34,12 @@ export default function PlaceDetailScreen({ route }: any) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Hero Image */}
       <Image
         source={imageError ? fallbackImage : { uri: place.image }}
         style={styles.image}
         onError={() => setImageError(true)}
       />
 
-      {/* Content Card */}
       <View style={styles.content}>
         <Text style={styles.title}>{place.name}</Text>
         <Text style={styles.description}>{place.description}</Text>
@@ -48,9 +49,7 @@ export default function PlaceDetailScreen({ route }: any) {
             styles.button,
             place.visited ? styles.visitedButton : styles.primaryButton,
           ]}
-          onPress={() =>
-            dispatch({ type: 'TOGGLE_VISITED', payload: place.id })
-          }
+          onPress={() => dispatch(toggleVisited(place.id))}
         >
           <Text style={styles.buttonText}>
             {place.visited ? 'Visited' : 'Mark Visited'}

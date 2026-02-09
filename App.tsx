@@ -7,8 +7,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 
 import AppNavigator from './navigation/AppNavigator';
-import { PlacesProvider } from './context/PlacesContext';
+// import { PlacesProvider } from './context/PlacesContext';
 import { Linking } from 'react-native';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 enableScreens(true);
 
@@ -42,11 +44,11 @@ const linking = {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PlacesProvider>
+      <Provider store={store}>
         <NavigationContainer linking={linking} fallback={null}>
           <AppNavigator />
         </NavigationContainer>
-      </PlacesProvider>
+      </Provider>
     </GestureHandlerRootView>
   );
 }

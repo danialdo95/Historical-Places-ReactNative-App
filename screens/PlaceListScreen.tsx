@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
@@ -7,25 +7,33 @@ import {
   Pressable,
   Image,
 } from 'react-native';
-import { PlacesContext } from '../context/PlacesContext';
+import { useDispatch, useSelector } from 'react-redux';
 import PlaceCard from '../components/PlaceCard';
+import { fetchPlaces, toggleVisited } from '../places/places.action';
 
 export default function PlaceListScreen({ navigation }: any) {
-  const { state, dispatch } = useContext(PlacesContext);
+  const dispatch = useDispatch();
+  const places = useSelector((state: any) => state.places.places);
+
   const [suggestedPlace, setSuggestedPlace] = useState<any>(null);
   const [suggestionImageError, setSuggestionImageError] = useState(false);
 
+  console.log('Redux places:', places);
+  // 🔄 Fetch places via Epic
+  useEffect(() => {
+    dispatch(fetchPlaces());
+  }, [dispatch]);
 
   const suggestRandomPlace = () => {
-    if (state.places.length === 0) return;
+    if (places.length === 0) return;
 
-    const randomIndex = Math.floor(Math.random() * state.places.length);
-    setSuggestionImageError(false); // ✅ reset image error
-    setSuggestedPlace(state.places[randomIndex]);
+    const randomIndex = Math.floor(Math.random() * places.length);
+    setSuggestionImageError(false);
+    setSuggestedPlace(places[randomIndex]);
   };
 
   const clearSuggestedPlace = () => {
-    setSuggestionImageError(false); // ✅ reset image error
+    setSuggestionImageError(false);
     setSuggestedPlace(null);
   };
 
@@ -58,7 +66,6 @@ export default function PlaceListScreen({ navigation }: any) {
             <Text style={styles.suggestionHint}>Tap to view details</Text>
           </Pressable>
 
-          {/* Clear button */}
           <Pressable style={styles.clearButton} onPress={clearSuggestedPlace}>
             <Text style={styles.clearButtonText}>Clear suggestion</Text>
           </Pressable>
@@ -66,16 +73,20 @@ export default function PlaceListScreen({ navigation }: any) {
       )}
 
       <FlatList
-        data={state.places}
+        data={
+          suggestedPlace
+            ? places.filter(p => p.id !== suggestedPlace.id)
+            : places
+        }
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <PlaceCard
             place={item}
-            onPress={() => navigation.navigate('Details', { id: item.id })}
-            onToggle={() =>
-              dispatch({ type: 'TOGGLE_VISITED', payload: item.id })
+            onPress={() =>
+              navigation.navigate('Details', { id: item.id })
             }
+            onToggle={() => dispatch(toggleVisited(item.id))}
           />
         )}
       />
